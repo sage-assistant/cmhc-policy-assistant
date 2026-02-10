@@ -1,536 +1,334 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CMHC Multi-Unit Policy Assistant</title>
+<title>CMHC Policy Assistant</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --font:'Inter',system-ui,sans-serif;
-  --sidebar-w:300px;
-  --radius:12px;
-  --transition:all .2s cubic-bezier(.4,0,.2,1);
+  --bg:#0a0f1a;--bg2:#0f1525;--surface:#141c2e;--surface2:#1a2540;
+  --accent:#10b981;--accent2:#0ea5e9;--accent-dim:rgba(16,185,129,0.12);
+  --text:#e8ecf4;--text2:#8899b0;--text3:#4a5568;
+  --border:#1a2540;--radius:12px;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
 }
-[data-theme="dark"]{
-  --bg:#0b0f1a;--bg-secondary:#111827;--surface:#1a2233;--surface-hover:#1e2a3e;
-  --surface-active:#243349;--border:#1e2d42;--border-light:#15202f;
-  --text:#e2e8f0;--text-secondary:#8892a4;--text-muted:#5a6577;
-  --primary:#14b8a6;--primary-dim:rgba(20,184,166,.12);--primary-glow:rgba(20,184,166,.25);
-  --accent:#06d6a0;--accent-dim:rgba(6,214,160,.1);
-  --user-msg:#14b8a6;--user-msg-text:#fff;
-  --bot-msg:#151d2e;--bot-border:#1e2d42;
-  --header-bg:rgba(17,24,39,.85);--header-border:#1e2d42;
-  --input-bg:#111827;--input-border:#1e2d42;--input-focus:#14b8a6;
-  --login-bg:#070a12;
-  --danger:#ef4444;--warning:#f59e0b;
-  --shadow:0 4px 24px rgba(0,0,0,.4);
-  --glow:0 0 20px rgba(20,184,166,.15);
-}
-[data-theme="light"]{
-  --bg:#f1f5f9;--bg-secondary:#fff;--surface:#fff;--surface-hover:#f8fafc;
-  --surface-active:#f1f5f9;--border:#e2e8f0;--border-light:#f1f5f9;
-  --text:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;
-  --primary:#0d9488;--primary-dim:rgba(13,148,136,.08);--primary-glow:rgba(13,148,136,.15);
-  --accent:#06d6a0;--accent-dim:rgba(6,214,160,.06);
-  --user-msg:#0d9488;--user-msg-text:#fff;
-  --bot-msg:#fff;--bot-border:#e2e8f0;
-  --header-bg:rgba(255,255,255,.9);--header-border:#e2e8f0;
-  --input-bg:#fff;--input-border:#e2e8f0;--input-focus:#0d9488;
-  --login-bg:#f1f5f9;
-  --danger:#ef4444;--warning:#f59e0b;
-  --shadow:0 4px 24px rgba(0,0,0,.08);
-  --glow:0 0 20px rgba(13,148,136,.08);
-}
-html,body{height:100%;overflow:hidden}
-body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
-
-/* ========== SCROLLBAR ========== */
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden}
+a{color:var(--accent)}
+::selection{background:var(--accent);color:#fff}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+::-webkit-scrollbar-thumb:hover{background:#2a3a58}
 
-/* ========== LOGIN ========== */
-.login-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:var(--login-bg);overflow:hidden}
-.login-bg{position:absolute;inset:0;overflow:hidden}
-.login-bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.4;animation:orbFloat 20s ease-in-out infinite}
-.login-bg .orb:nth-child(1){width:400px;height:400px;background:var(--primary);top:-10%;left:-5%;animation-delay:0s}
-.login-bg .orb:nth-child(2){width:350px;height:350px;background:#6366f1;bottom:-10%;right:-5%;animation-delay:-7s}
-.login-bg .orb:nth-child(3){width:250px;height:250px;background:var(--accent);top:50%;left:50%;animation-delay:-14s}
-@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-40px) scale(1.1)}50%{transform:translate(-20px,30px) scale(.95)}75%{transform:translate(40px,20px) scale(1.05)}}
-.login-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.15}
-.login-card{position:relative;z-index:1;width:90%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;backdrop-filter:blur(20px);box-shadow:var(--shadow)}
-.login-logo{width:64px;height:64px;margin:0 auto 24px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:var(--glow)}
-.login-card h1{font-size:24px;font-weight:800;text-align:center;margin-bottom:4px;letter-spacing:-.5px}
-.login-card .tagline{text-align:center;color:var(--text-secondary);font-size:14px;margin-bottom:32px}
-.login-features{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
-.login-feature{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-secondary)}
-.login-feature .lf-icon{width:32px;height:32px;border-radius:8px;background:var(--primary-dim);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.login-input{width:100%;padding:14px 18px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:15px;text-align:center;letter-spacing:3px;outline:none;transition:var(--transition);margin-bottom:14px}
-.login-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow)}
-.login-input::placeholder{letter-spacing:normal;color:var(--text-muted)}
-.login-btn{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:var(--transition);position:relative;overflow:hidden}
-.login-btn:hover{transform:translateY(-1px);box-shadow:var(--glow)}
+/* LOGIN */
+#login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:100;
+  background:var(--bg)}
+#login-screen::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 20%,rgba(16,185,129,0.08),transparent 50%),
+             radial-gradient(ellipse at 70% 80%,rgba(14,165,233,0.06),transparent 50%);
+  animation:bgShift 12s ease-in-out infinite alternate}
+@keyframes bgShift{0%{opacity:0.7}50%{opacity:1}100%{opacity:0.7}}
+.login-box{position:relative;text-align:center;max-width:380px;width:90%}
+.login-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:14px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff}
+.login-title{font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:8px}
+.login-tagline{font-size:14px;color:var(--text2);line-height:1.5;margin-bottom:36px}
+.login-input{width:100%;padding:14px 18px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-family:var(--font);font-size:15px;outline:none;transition:border .2s}
+.login-input:focus{border-color:var(--accent)}
+.login-input::placeholder{color:var(--text3)}
+.login-btn{width:100%;margin-top:14px;padding:14px;background:var(--accent);color:#fff;border:none;
+  border-radius:10px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s}
+.login-btn:hover{background:#0da572;transform:translateY(-1px)}
 .login-btn:active{transform:translateY(0)}
-.login-error{color:var(--danger);font-size:13px;text-align:center;margin-top:12px;display:none}
+.login-error{color:#f87171;font-size:13px;margin-top:12px;min-height:20px}
+.login-hide{display:none!important}
 
-/* ========== HEADER ========== */
-.header{height:56px;display:flex;align-items:center;gap:12px;padding:0 20px;background:var(--header-bg);border-bottom:1px solid var(--header-border);backdrop-filter:blur(12px);z-index:20;flex-shrink:0}
-.hamburger{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:6px;border-radius:8px;transition:var(--transition)}
-.hamburger:hover{background:var(--surface-hover)}
-.header-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.header-title{font-size:15px;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
-.header-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--primary-dim);color:var(--primary);text-transform:uppercase;letter-spacing:.5px}
-.header-spacer{flex:1}
-.header-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);font-family:var(--font);font-size:13px;font-weight:500;padding:7px 14px;border-radius:8px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:6px}
-.header-btn:hover{background:var(--surface-hover);color:var(--text);border-color:var(--primary)}
-.theme-toggle{background:none;border:none;color:var(--text-secondary);font-size:18px;cursor:pointer;padding:6px;border-radius:8px;transition:var(--transition);display:flex;align-items:center}
-.theme-toggle:hover{color:var(--text);background:var(--surface-hover)}
+/* APP */
+#app{display:none;flex-direction:column;height:100vh}
+#app.active{display:flex}
 
-/* ========== LAYOUT ========== */
-.main{display:flex;flex:1;overflow:hidden}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:29;backdrop-filter:blur(2px)}
-.sidebar{width:var(--sidebar-w);background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;z-index:30}
-.sidebar-section{padding:16px 16px 4px}
-.sidebar-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;padding:0 4px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
-.sidebar-label::after{content:'▾';font-size:10px;transition:transform .2s}
-.sidebar-label.collapsed::after{transform:rotate(-90deg)}
-.sidebar-group{display:flex;flex-direction:column;gap:2px;overflow:hidden;transition:max-height .3s ease,opacity .2s}
-.sidebar-group.collapsed{max-height:0!important;opacity:0}
-.topic-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;background:transparent;text-align:left;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:var(--transition);width:100%;border-radius:8px;line-height:1.4}
-.topic-btn:hover{background:var(--surface-hover);color:var(--text)}
-.topic-btn:active{background:var(--surface-active)}
-.topic-btn .t-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;background:var(--primary-dim)}
-.topic-btn.cat-aclp .t-icon{background:rgba(99,102,241,.12)}
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;
+  border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.header-brand{display:flex;align-items:center;gap:12px}
+.header-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff}
+.header-name{font-size:16px;font-weight:600;letter-spacing:-0.2px}
+.header-btn{padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  color:var(--text2);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.header-btn:hover{background:var(--surface2);color:var(--text)}
 
-/* ========== CHAT AREA ========== */
-.chat-area{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
-.messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
-.messages:empty::before{content:''}
+/* CHAT AREA */
+.chat-wrap{flex:1;overflow-y:auto;padding:0}
+.chat-inner{max-width:780px;margin:0 auto;padding:24px 20px 120px}
 
-/* Welcome screen */
-.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px 20px;animation:fadeUp .5s ease}
-.welcome-icon{font-size:48px;margin-bottom:20px;opacity:.8}
-.welcome h2{font-size:22px;font-weight:700;margin-bottom:8px;letter-spacing:-.3px}
-.welcome p{font-size:14px;color:var(--text-secondary);max-width:420px;text-align:center;line-height:1.6;margin-bottom:32px}
-.starter-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:520px;width:100%}
-.starter-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;transition:var(--transition);text-align:left;font-family:var(--font)}
-.starter-card:hover{border-color:var(--primary);background:var(--surface-hover);transform:translateY(-2px);box-shadow:var(--glow)}
-.starter-card .sc-icon{font-size:18px;margin-bottom:8px}
-.starter-card .sc-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
-.starter-card .sc-desc{font-size:11px;color:var(--text-muted);line-height:1.4}
+/* WELCOME */
+.welcome{text-align:center;padding:60px 0 40px}
+.welcome h2{font-size:24px;font-weight:700;letter-spacing:-0.3px;margin-bottom:8px}
+.welcome p{color:var(--text2);font-size:14px;margin-bottom:40px}
+.suggestions{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;text-align:left}
+.sug-card{padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  cursor:pointer;transition:all .2s}
+.sug-card:hover{background:var(--surface2);border-color:var(--accent);transform:translateY(-2px)}
+.sug-icon{font-size:20px;margin-bottom:8px}
+.sug-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.sug-desc{font-size:12px;color:var(--text2);line-height:1.4}
 
-/* Messages */
-.msg{max-width:780px;line-height:1.7;animation:fadeUp .3s ease}
-.msg.user{align-self:flex-end;background:var(--user-msg);color:var(--user-msg-text);padding:12px 18px;border-radius:16px 16px 4px 16px;font-size:14px;max-width:600px}
-.msg-wrapper{display:flex;flex-direction:column;gap:6px;align-self:flex-start;width:100%;max-width:780px}
-.msg-header{display:flex;align-items:center;gap:8px}
-.msg-avatar{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
-.msg-name{font-size:12px;font-weight:600;color:var(--text-secondary)}
-.msg-time{font-size:11px;color:var(--text-muted)}
-.msg.bot{background:var(--bot-msg);border:1px solid var(--bot-border);padding:16px 20px;border-radius:4px 16px 16px 16px;font-size:14px}
-.msg.bot h1,.msg.bot h2,.msg.bot h3{margin:14px 0 6px;color:var(--primary);font-weight:700}
-.msg.bot h1{font-size:17px}.msg.bot h2{font-size:15px}.msg.bot h3{font-size:14px}
-.msg.bot p{margin:5px 0}.msg.bot ul,.msg.bot ol{margin:5px 0 5px 18px}
-.msg.bot li{margin:3px 0;font-size:14px}
-.msg.bot strong{color:var(--primary)}
-.msg.bot table{border-collapse:collapse;margin:12px 0;width:100%;font-size:12px;border-radius:8px;overflow:hidden}
-.msg.bot th{background:var(--primary);color:#fff;padding:8px 12px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
-.msg.bot td{padding:8px 12px;border-bottom:1px solid var(--border)}
-.msg.bot tr:nth-child(even){background:var(--surface-hover)}
-.msg.bot code{background:var(--surface-active);padding:2px 6px;border-radius:4px;font-size:12px;font-family:'SF Mono',Monaco,Consolas,monospace}
-.msg.bot blockquote{border-left:3px solid var(--primary);padding:8px 14px;margin:8px 0;background:var(--primary-dim);border-radius:0 8px 8px 0;font-size:13px}
-.msg-actions{display:flex;gap:4px;margin-top:4px;opacity:0;transition:opacity .2s}
-.msg-wrapper:hover .msg-actions{opacity:1}
-.msg-action-btn{background:none;border:1px solid var(--border);color:var(--text-muted);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:var(--font);transition:var(--transition);display:flex;align-items:center;gap:4px}
-.msg-action-btn:hover{background:var(--surface-hover);color:var(--text);border-color:var(--primary)}
-.msg-action-btn.copied{color:var(--primary);border-color:var(--primary)}
+/* MESSAGES */
+.msg{margin-bottom:20px;display:flex;gap:12px}
+.msg.user{justify-content:flex-end}
+.msg.user .msg-bubble{background:var(--accent);color:#fff;border-radius:16px 16px 4px 16px;max-width:70%}
+.msg.bot .msg-bubble{background:var(--surface);border:1px solid var(--border);border-radius:16px 16px 16px 4px;
+  max-width:85%;position:relative}
+.msg-bubble{padding:14px 18px;font-size:14px;line-height:1.7}
+.msg-bubble p{margin-bottom:10px}
+.msg-bubble p:last-child{margin-bottom:0}
+.msg-bubble strong{color:var(--accent);font-weight:600}
+.msg-bubble ul,.msg-bubble ol{margin:8px 0 8px 20px}
+.msg-bubble li{margin-bottom:4px}
+.msg-bubble code{background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:13px}
+.msg-bubble pre{background:var(--bg);padding:12px;border-radius:8px;overflow-x:auto;margin:10px 0}
+.msg-bubble pre code{background:none;padding:0}
+.msg-bubble table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+.msg-bubble th{background:rgba(16,185,129,0.1);color:var(--accent);text-align:left;padding:10px 12px;
+  border-bottom:2px solid var(--border);font-weight:600}
+.msg-bubble td{padding:8px 12px;border-bottom:1px solid var(--border)}
+.msg-bubble tr:hover td{background:rgba(255,255,255,0.02)}
+.msg-bubble h1,.msg-bubble h2,.msg-bubble h3{font-size:15px;font-weight:700;margin:16px 0 8px;color:var(--text)}
+.msg-bubble blockquote{border-left:3px solid var(--accent);padding-left:12px;color:var(--text2);margin:10px 0}
+.citation{display:inline-block;background:var(--accent-dim);color:var(--accent);padding:2px 8px;
+  border-radius:20px;font-size:11px;font-weight:600;margin:0 2px;vertical-align:middle}
 
-/* Thinking indicator */
-.thinking{display:flex;align-items:center;gap:10px;padding:16px 20px;align-self:flex-start;animation:fadeUp .3s}
-.thinking-dots{display:flex;gap:4px}
-.thinking-dots span{width:6px;height:6px;background:var(--primary);border-radius:50%;animation:pulse 1.4s ease-in-out infinite}
-.thinking-dots span:nth-child(2){animation-delay:.2s}
-.thinking-dots span:nth-child(3){animation-delay:.4s}
-.thinking-text{font-size:12px;color:var(--text-muted);font-weight:500}
-@keyframes pulse{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* Copy button */
+.msg-copy{position:absolute;top:8px;right:8px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text2);cursor:pointer;opacity:0;transition:all .2s;
+  font-family:var(--font)}
+.msg.bot:hover .msg-copy{opacity:1}
+.msg-copy:hover{background:var(--surface2);color:var(--text)}
 
-/* ========== INPUT ========== */
-.input-area{padding:12px 20px 8px;background:var(--bg);border-top:1px solid var(--border)}
-.input-wrap{display:flex;gap:10px;max-width:800px;margin:0 auto;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:14px;padding:4px 4px 4px 16px;transition:var(--transition);align-items:flex-end}
-.input-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow)}
-.input-wrap textarea{flex:1;padding:10px 0;background:transparent;border:none;color:var(--text);font-family:var(--font);font-size:14px;resize:none;outline:none;min-height:20px;max-height:120px;line-height:1.5}
-.input-wrap textarea::placeholder{color:var(--text-muted)}
-.send-btn{width:40px;height:40px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-size:16px;cursor:pointer;transition:var(--transition);flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.send-btn:hover{opacity:.85;transform:scale(1.05)}
-.send-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
-.input-hint{text-align:center;padding:6px;font-size:11px;color:var(--text-muted)}
-.input-hint kbd{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:var(--font);font-size:10px}
+/* Typing indicator */
+.typing{display:flex;gap:4px;padding:4px 0}
+.typing span{width:6px;height:6px;background:var(--text3);border-radius:50%;animation:bounce .6s infinite alternate}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{to{opacity:0.3;transform:translateY(-4px)}}
 
-/* ========== LOADING SCREEN ========== */
-.app-loader{position:fixed;inset:0;background:var(--bg);z-index:2000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;transition:opacity .4s}
-.app-loader.hidden{opacity:0;pointer-events:none}
-.loader-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* INPUT */
+.input-wrap{position:fixed;bottom:0;left:0;right:0;padding:16px 20px 20px;background:linear-gradient(transparent,var(--bg) 30%)}
+.input-inner{max-width:780px;margin:0 auto;display:flex;gap:10px}
+.input-field{flex:1;padding:14px 18px;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border .2s;
+  resize:none;max-height:120px;line-height:1.5}
+.input-field:focus{border-color:var(--accent)}
+.input-field::placeholder{color:var(--text3)}
+.send-btn{width:46px;height:46px;background:var(--accent);border:none;border-radius:12px;color:#fff;
+  font-size:18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send-btn:hover{background:#0da572;transform:translateY(-1px)}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
 
-/* ========== RESPONSIVE ========== */
-@media(max-width:768px){
-  .sidebar{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:30;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
-  .sidebar.open{transform:translateX(0)}
-  .sidebar-overlay.open{display:block}
-  .hamburger{display:flex}
-  .header-title{font-size:14px}
-  .header-badge{display:none}
-  .messages{padding:16px}
-  .starter-cards{grid-template-columns:1fr}
-  .input-area{padding:8px 12px 6px}
-  .msg.user{max-width:85%}
-}
-@media(max-width:480px){
-  .login-card{padding:36px 24px}
-  .header-btn span{display:none}
+@media(max-width:600px){
+  .header{padding:12px 16px}
+  .chat-inner{padding:16px 14px 110px}
+  .welcome{padding:40px 0 24px}
+  .suggestions{grid-template-columns:1fr}
+  .msg.user .msg-bubble,.msg.bot .msg-bubble{max-width:90%}
+  .input-wrap{padding:10px 12px 14px}
 }
 </style>
 </head>
 <body>
-
-<!-- App loader -->
-<div class="app-loader" id="appLoader">
-  <div class="loader-spinner"></div>
-</div>
-
-<!-- Login -->
-<div class="login-overlay" id="loginOverlay">
-  <div class="login-bg">
-    <div class="orb"></div><div class="orb"></div><div class="orb"></div>
-    <div class="login-grid"></div>
-  </div>
-  <div class="login-card">
-    <div class="login-logo">🏢</div>
-    <h1>CMHC Policy Assistant</h1>
-    <p class="tagline">Your AI powered CMHC multi unit policy expert</p>
-    <div class="login-features">
-      <div class="login-feature"><div class="lf-icon">⚡</div><span>Instant answers on eligibility, premiums, and LTV ratios</span></div>
-      <div class="login-feature"><div class="lf-icon">📋</div><span>Full documentation checklists and processing guidance</span></div>
-      <div class="login-feature"><div class="lf-icon">🏗️</div><span>MLI Select, ACLP, and construction financing details</span></div>
-    </div>
-    <input type="password" class="login-input" id="loginPassword" placeholder="Enter access code" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off">
-    <button class="login-btn" onclick="doLogin()">Access Dashboard</button>
-    <div class="login-error" id="loginError">Invalid access code. Please try again.</div>
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🏛</div>
+    <div class="login-title">CMHC Policy Assistant</div>
+    <div class="login-tagline">AI powered CMHC policy intelligence<br>for mortgage professionals</div>
+    <input type="password" id="pw" class="login-input" placeholder="Enter access password" autofocus>
+    <button id="login-btn" class="login-btn" onclick="doLogin()">Sign In</button>
+    <div id="login-err" class="login-error"></div>
   </div>
 </div>
 
-<!-- Header -->
-<div class="header">
-  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
-  <div class="header-logo">🏢</div>
-  <span class="header-title">CMHC Policy Assistant</span>
-  <span class="header-badge">Beta</span>
-  <div class="header-spacer"></div>
-  <button class="header-btn" onclick="newChat()" title="New Chat">✦ <span>New Chat</span></button>
-  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
-</div>
-
-<!-- Main -->
-<div class="main">
-  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label" onclick="toggleSection(this)">Multi Unit Insurance</div>
-      <div class="sidebar-group">
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What are the eligibility requirements for CMHC multi-unit mortgage loan insurance? What property types qualify, what are the minimum unit requirements, and what are the borrower requirements?"><div class="t-icon">✓</div><span>Eligibility Requirements</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What are the current CMHC multi-unit insurance premium rates? Please show the full premium rate tables for both Standard Rental Housing and All Other Shelter Models, including construction financing rates and surcharges."><div class="t-icon">💰</div><span>Premium Rates</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What are the maximum loan-to-value (LTV) ratios for CMHC multi-unit mortgage insurance? How do they differ between Market Rental and MLI Select, and between purchase, refinance, and construction?"><div class="t-icon">📊</div><span>LTV Ratios</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What documents are required for a CMHC multi-unit mortgage insurance application? Please provide the full documentation checklist including financial, property, project planning, legal, and environmental requirements."><div class="t-icon">📋</div><span>Documentation Checklist</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="How does CMHC multi-unit insurance differ for rental properties versus condominium projects? What are the key considerations for each type?"><div class="t-icon">🏘️</div><span>Rental vs Condo</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="How does CMHC construction financing work for multi-unit properties? What are the premium rates, LTV limits, process, and required documentation for construction loans?"><div class="t-icon">🏗️</div><span>Construction Financing</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What affordable housing incentives does CMHC offer through its multi-unit programs? How does the MLI Select affordability scoring work, and what programs like ACLP complement it?"><div class="t-icon">🏠</div><span>Affordable Housing</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What are the CMHC rules for refinancing multi-unit properties? What are the maximum LTV ratios, premium rates, eligible purposes, and special rules for affordable housing refinancing?"><div class="t-icon">🔄</div><span>Refinancing Rules</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What are the typical processing timelines for CMHC multi-unit mortgage insurance applications? What factors affect processing time and how can I expedite the process?"><div class="t-icon">⏱️</div><span>Processing Timelines</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What are CMHC's environmental requirements for multi-unit mortgage insurance? What Phase I and Phase II ESA requirements apply, and what energy efficiency standards are expected?"><div class="t-icon">🌿</div><span>Environmental Requirements</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What is the CMHC MLI Select program? How does the points-based system work for affordability, energy efficiency, and accessibility? What are the premium discounts and other benefits?"><div class="t-icon">⭐</div><span>MLI Select Program</span></button>
-        <button class="topic-btn" onclick="askTopic(this)" data-q="What are the most recent changes to CMHC multi-unit mortgage insurance policies in 2025? What changed with Advice 263 and 264, and how do the new premium structures work?"><div class="t-icon">📰</div><span>2025 Policy Changes</span></button>
-      </div>
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="header-brand">
+      <div class="header-icon">🏛</div>
+      <div class="header-name">CMHC Policy Assistant</div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-label" onclick="toggleSection(this)">ACLP Program</div>
-      <div class="sidebar-group">
-        <button class="topic-btn cat-aclp" onclick="askTopic(this)" data-q="What is the CMHC Apartment Construction Loan Program (ACLP)? How does it work, what does it offer, and what types of projects does it fund? Please provide a comprehensive overview."><div class="t-icon">🏗️</div><span>ACLP Overview</span></button>
-        <button class="topic-btn cat-aclp" onclick="askTopic(this)" data-q="What are the eligibility requirements for the CMHC ACLP program? Who can apply, what project types qualify, and what are the affordability requirements? Include details on student housing and seniors housing eligibility."><div class="t-icon">✓</div><span>ACLP Eligibility</span></button>
-        <button class="topic-btn cat-aclp" onclick="askTopic(this)" data-q="What are the ACLP loan terms, interest rates, and financial details? What is the maximum loan amount, loan-to-cost ratio, amortization period, and how are interest rates determined?"><div class="t-icon">💰</div><span>ACLP Terms & Rates</span></button>
-        <button class="topic-btn cat-aclp" onclick="askTopic(this)" data-q="What is the ACLP application process? What are the steps, required documentation, timeline, and tips for a strong application? Include details on the scoring system and Frequent Builder framework."><div class="t-icon">📋</div><span>ACLP Application Process</span></button>
-        <button class="topic-btn cat-aclp" onclick="askTopic(this)" data-q="How does the CMHC ACLP compare to standard Multi-Unit Mortgage Loan Insurance (MU MLI) and MLI Select? When should a developer use each program, and how do they complement each other?"><div class="t-icon">⚖️</div><span>ACLP vs MLI vs MLI Select</span></button>
-      </div>
-    </div>
-  </aside>
-  <div class="chat-area">
-    <div class="messages" id="messages">
-      <div class="welcome" id="welcomeScreen">
-        <div class="welcome-icon">🏢</div>
-        <h2>How can I help you today?</h2>
-        <p>Ask anything about CMHC multi unit mortgage loan insurance, MLI Select, or the Apartment Construction Loan Program. I have the latest policies and guidelines ready.</p>
-        <div class="starter-cards">
-          <div class="starter-card" onclick="askStarter('What are the current CMHC multi-unit insurance premium rates? Show me the full rate tables.')">
-            <div class="sc-icon">💰</div>
-            <div class="sc-title">Premium Rate Tables</div>
-            <div class="sc-desc">Current rates for all property types and LTV tiers</div>
-          </div>
-          <div class="starter-card" onclick="askStarter('What are the eligibility requirements for CMHC multi-unit mortgage loan insurance?')">
-            <div class="sc-icon">✓</div>
-            <div class="sc-title">Eligibility Check</div>
-            <div class="sc-desc">Property types, unit counts, and borrower requirements</div>
-          </div>
-          <div class="starter-card" onclick="askStarter('What is MLI Select and how does the points system work for premium discounts?')">
-            <div class="sc-icon">⭐</div>
-            <div class="sc-title">MLI Select Program</div>
-            <div class="sc-desc">Points system, discounts, and qualification criteria</div>
-          </div>
-          <div class="starter-card" onclick="askStarter('Compare ACLP vs standard multi-unit insurance. When should I use each?')">
-            <div class="sc-icon">⚖️</div>
-            <div class="sc-title">ACLP vs MLI</div>
-            <div class="sc-desc">Program comparison and when to use each option</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="input-area">
-      <div class="input-wrap">
-        <textarea id="input" placeholder="Ask about CMHC multi unit policies..." rows="1" onkeydown="handleKey(event)"></textarea>
-        <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
-      </div>
-      <div class="input-hint">This tool provides information based on public CMHC documentation. Always verify with CMHC for official decisions.</div>
+    <button class="header-btn" onclick="newChat()">+ New Chat</button>
+  </div>
+  <div class="chat-wrap" id="chat-wrap">
+    <div class="chat-inner" id="chat"></div>
+  </div>
+  <div class="input-wrap">
+    <div class="input-inner">
+      <textarea id="input" class="input-field" placeholder="Ask about CMHC policies..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"></textarea>
+      <button class="send-btn" id="send-btn" onclick="send()">↑</button>
     </div>
   </div>
 </div>
 
 <script>
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-  ? '' : 'http://178.156.217.249:3456';
-const msgs=document.getElementById('messages'),input=document.getElementById('input'),sendBtn=document.getElementById('sendBtn');
-let history=[],streaming=false,authToken=sessionStorage.getItem('cmhc_token')||'';
-const STORAGE_KEY='cmhc_chat_history';
-
-// Theme
-function setTheme(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('cmhc_theme',t);document.getElementById('themeBtn').textContent=t==='dark'?'☀️':'🌙'}
-function toggleTheme(){setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')}
-setTheme(localStorage.getItem('cmhc_theme')||'dark');
-
-// App loader
-window.addEventListener('load',()=>{setTimeout(()=>{document.getElementById('appLoader').classList.add('hidden')},400)});
+const API_BASE='https://hardwood-input-patterns-guitar.trycloudflare.com';
+let token=localStorage.getItem('cmhc_token')||'';
+let messages=JSON.parse(localStorage.getItem('cmhc_history')||'[]');
+let streaming=false;
 
 // Auto-login if token exists
-if(authToken)document.getElementById('loginOverlay').style.display='none';
+if(token){showApp();renderAll()}
 
-// Restore chat history from localStorage
-function restoreChat(){
-  const saved=localStorage.getItem(STORAGE_KEY);
-  if(!saved)return;
-  try{
-    const items=JSON.parse(saved);
-    if(!items.length)return;
-    const w=document.getElementById('welcomeScreen');
-    if(w)w.remove();
-    for(const item of items){
-      if(item.role==='user'){
-        addMsg('user',escHtml(item.content),false);
-        history.push({role:'user',content:item.content});
-      }else{
-        const wrapper=createBotWrapper();
-        const botDiv=wrapper.querySelector('.msg.bot');
-        botDiv.innerHTML=md(item.content);
-        msgs.appendChild(wrapper);
-        history.push({role:'assistant',content:item.content});
-      }
-    }
-    msgs.scrollTop=msgs.scrollHeight;
-  }catch(e){}
-}
-function saveChat(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-20)))}catch(e){}
-}
-if(authToken)restoreChat();
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 
 async function doLogin(){
-  const pw=document.getElementById('loginPassword').value;
+  const pw=document.getElementById('pw').value.trim();
+  if(!pw)return;
+  const err=document.getElementById('login-err');
+  err.textContent='';
   try{
-    const res=await fetch(API_BASE+'/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
-    const data=await res.json();
-    if(data.ok){
-      authToken=data.token;
-      sessionStorage.setItem('cmhc_token',authToken);
-      document.getElementById('loginOverlay').style.display='none';
-      document.getElementById('loginError').style.display='none';
-      restoreChat();
-    }else{
-      document.getElementById('loginError').style.display='block';
-    }
-  }catch(e){
-    document.getElementById('loginError').textContent='Connection error. Please try again.';
-    document.getElementById('loginError').style.display='block';
+    const r=await fetch(API_BASE+'/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    const d=await r.json();
+    if(d.ok){token=d.token;localStorage.setItem('cmhc_token',token);showApp();renderAll()}
+    else{err.textContent='Invalid password'}
+  }catch(e){err.textContent='Connection error. Please try again.'}
+}
+
+function showApp(){
+  document.getElementById('login-screen').classList.add('login-hide');
+  document.getElementById('app').classList.add('active');
+}
+
+function saveHistory(){localStorage.setItem('cmhc_history',JSON.stringify(messages))}
+
+function newChat(){messages=[];localStorage.removeItem('cmhc_history');renderAll()}
+
+const SUGGESTIONS=[
+  {icon:'✅',title:'Eligibility Requirements',desc:'Who qualifies for CMHC multi unit insurance?',q:'What are the eligibility requirements for CMHC multi-unit mortgage loan insurance?'},
+  {icon:'💰',title:'Premium Rates',desc:'Current insurance premium schedules',q:'What are the current CMHC multi-unit premium rates?'},
+  {icon:'🏗',title:'ACLP Overview',desc:'Apartment Construction Loan Program details',q:'Can you give me an overview of the CMHC Apartment Construction Loan Program (ACLP)?'},
+  {icon:'📊',title:'LTV Ratios',desc:'Maximum loan to value requirements',q:'What are the maximum LTV ratios for CMHC insured multi-unit properties?'},
+  {icon:'🌿',title:'MLI Select',desc:'Energy efficiency incentives and discounts',q:'How does the MLI Select program work and what are the premium discounts?'},
+  {icon:'🔨',title:'Construction Financing',desc:'Progress advance and completion requirements',q:'What are CMHC requirements for construction financing and progress advances?'}
+];
+
+function renderAll(){
+  const chat=document.getElementById('chat');
+  if(messages.length===0){
+    chat.innerHTML=`<div class="welcome"><h2>How can I help you today?</h2><p>Ask any question about CMHC multi unit insurance policies</p><div class="suggestions">${SUGGESTIONS.map(s=>`<div class="sug-card" onclick="sendQ('${s.q.replace(/'/g,"\\'")}')"><div class="sug-icon">${s.icon}</div><div class="sug-title">${s.title}</div><div class="sug-desc">${s.desc}</div></div>`).join('')}</div></div>`;
+    return;
   }
+  chat.innerHTML=messages.map((m,i)=>{
+    if(m.role==='user')return`<div class="msg user"><div class="msg-bubble">${esc(m.content)}</div></div>`;
+    return`<div class="msg bot"><div class="msg-bubble">${renderMd(m.content)}<button class="msg-copy" onclick="copyMsg(${i})">Copy</button></div></div>`;
+  }).join('');
+  scrollDown();
 }
 
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.querySelector('.sidebar-overlay').classList.toggle('open');
-}
-function toggleSection(el){
-  el.classList.toggle('collapsed');
-  el.nextElementSibling.classList.toggle('collapsed');
-}
-function newChat(){
-  history=[];
-  msgs.innerHTML='';
-  localStorage.removeItem(STORAGE_KEY);
-  // Recreate welcome
-  msgs.innerHTML=`<div class="welcome" id="welcomeScreen">
-    <div class="welcome-icon">🏢</div>
-    <h2>How can I help you today?</h2>
-    <p>Ask anything about CMHC multi unit mortgage loan insurance, MLI Select, or the Apartment Construction Loan Program. I have the latest policies and guidelines ready.</p>
-    <div class="starter-cards">
-      <div class="starter-card" onclick="askStarter('What are the current CMHC multi-unit insurance premium rates? Show me the full rate tables.')"><div class="sc-icon">💰</div><div class="sc-title">Premium Rate Tables</div><div class="sc-desc">Current rates for all property types and LTV tiers</div></div>
-      <div class="starter-card" onclick="askStarter('What are the eligibility requirements for CMHC multi-unit mortgage loan insurance?')"><div class="sc-icon">✓</div><div class="sc-title">Eligibility Check</div><div class="sc-desc">Property types, unit counts, and borrower requirements</div></div>
-      <div class="starter-card" onclick="askStarter('What is MLI Select and how does the points system work for premium discounts?')"><div class="sc-icon">⭐</div><div class="sc-title">MLI Select Program</div><div class="sc-desc">Points system, discounts, and qualification criteria</div></div>
-      <div class="starter-card" onclick="askStarter('Compare ACLP vs standard multi-unit insurance. When should I use each?')"><div class="sc-icon">⚖️</div><div class="sc-title">ACLP vs MLI</div><div class="sc-desc">Program comparison and when to use each option</div></div>
-    </div>
-  </div>`;
-}
-function askTopic(btn){
-  if(window.innerWidth<=768)toggleSidebar();
-  input.value=btn.dataset.q;
-  send();
-}
-function askStarter(q){
-  input.value=q;
-  send();
-}
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function getTime(){const d=new Date();return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
-function addMsg(role,html,scroll=true){
-  const d=document.createElement('div');
-  d.className='msg '+role;
-  d.innerHTML=html;
-  const w=document.getElementById('welcomeScreen');
-  if(w)w.remove();
-  msgs.appendChild(d);
-  if(scroll)msgs.scrollTop=msgs.scrollHeight;
-  return d;
-}
-function createBotWrapper(){
-  const wrapper=document.createElement('div');
-  wrapper.className='msg-wrapper';
-  wrapper.innerHTML=`<div class="msg-header"><div class="msg-avatar">🏢</div><span class="msg-name">CMHC Assistant</span><span class="msg-time">${getTime()}</span></div><div class="msg bot"></div><div class="msg-actions"><button class="msg-action-btn" onclick="copyMsg(this)">📋 Copy</button></div>`;
-  return wrapper;
-}
-function copyMsg(btn){
-  const botDiv=btn.closest('.msg-wrapper').querySelector('.msg.bot');
-  const text=botDiv.innerText;
-  navigator.clipboard.writeText(text).then(()=>{
-    btn.classList.add('copied');btn.innerHTML='✓ Copied';
-    setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML='📋 Copy'},2000);
-  });
-}
-function showTyping(){
-  const d=document.createElement('div');
-  d.className='thinking';d.id='typing';
-  d.innerHTML='<div class="thinking-dots"><span></span><span></span><span></span></div><span class="thinking-text">Analyzing policies...</span>';
-  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
-}
-function hideTyping(){const t=document.getElementById('typing');if(t)t.remove()}
-
-function md(text){
-  text=text.replace(/^\|(.+)\|\s*\n\|[-| :]+\|\s*\n((\|.+\|\s*\n?)*)/gm,(m,hdr,body)=>{
-    const ths=hdr.split('|').map(c=>`<th>${c.trim()}</th>`).join('');
-    const rows=body.trim().split('\n').map(r=>{
-      const tds=r.replace(/^\||\|$/g,'').split('|').map(c=>`<td>${c.trim()}</td>`).join('');
-      return `<tr>${tds}</tr>`;
-    }).join('');
-    return `<table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table>`;
-  });
-  text=text.replace(/^### (.+)$/gm,'<h3>$1</h3>');
-  text=text.replace(/^## (.+)$/gm,'<h2>$1</h2>');
-  text=text.replace(/^# (.+)$/gm,'<h1>$1</h1>');
-  text=text.replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>');
-  text=text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  text=text.replace(/\*(.+?)\*/g,'<em>$1</em>');
-  text=text.replace(/`(.+?)`/g,'<code>$1</code>');
-  text=text.replace(/^(\s*)[-•] (.+)$/gm,'$1<li>$2</li>');
-  text=text.replace(/(<li>.*<\/li>\n?)+/gs,m=>'<ul>'+m+'</ul>');
-  text=text.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
-  text=text.replace(/\n{2,}/g,'</p><p>');
-  text='<p>'+text+'</p>';
-  text=text.replace(/<p>\s*(<[hultbHULTB])/g,'$1');
-  text=text.replace(/(<\/[hultbHULTB][^>]*>)\s*<\/p>/g,'$1');
-  return text;
-}
-
-function handleKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}
-}
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    if(document.getElementById('sidebar').classList.contains('open'))toggleSidebar();
-  }
-});
+function sendQ(q){document.getElementById('input').value=q;send()}
 
 async function send(){
-  const text=input.value.trim();
-  if(!text||streaming)return;
-  streaming=true;sendBtn.disabled=true;
-  input.value='';input.style.height='auto';
+  if(streaming)return;
+  const inp=document.getElementById('input');
+  const text=inp.value.trim();
+  if(!text)return;
+  inp.value='';inp.style.height='auto';
+  messages.push({role:'user',content:text});
+  saveHistory();renderAll();
 
-  addMsg('user',escHtml(text));
-  history.push({role:'user',content:text});
-  showTyping();
+  streaming=true;
+  document.getElementById('send-btn').disabled=true;
 
-  let fullText='';
-  const wrapper=createBotWrapper();
-  const botDiv=wrapper.querySelector('.msg.bot');
+  // Add bot placeholder
+  const chat=document.getElementById('chat');
+  const botDiv=document.createElement('div');botDiv.className='msg bot';
+  botDiv.innerHTML='<div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+  chat.appendChild(botDiv);scrollDown();
 
+  let botText='';
   try{
-    const res=await fetch(API_BASE+'/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
-      body:JSON.stringify({message:text,history:history.slice(-10)})
-    });
-    hideTyping();
-    msgs.appendChild(wrapper);
-
-    const reader=res.body.getReader();
-    const dec=new TextDecoder();
-    let buf='';
+    const r=await fetch(API_BASE+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({message:text,history:messages.slice(-7,-1)})});
+    if(r.status===401){localStorage.removeItem('cmhc_token');location.reload();return}
+    const reader=r.body.getReader();const dec=new TextDecoder();let buf='';
     while(true){
       const{done,value}=await reader.read();
       if(done)break;
       buf+=dec.decode(value,{stream:true});
-      const lines=buf.split('\n');
-      buf=lines.pop();
+      const lines=buf.split('\n');buf=lines.pop();
       for(const line of lines){
-        if(line.startsWith('data: ')){
-          const d=line.slice(6);
-          if(d==='[DONE]')continue;
-          try{
-            const j=JSON.parse(d);
-            if(j.text){fullText+=j.text;botDiv.innerHTML=md(fullText);msgs.scrollTop=msgs.scrollHeight}
-            if(j.error){botDiv.innerHTML='<p>⚠️ '+j.error+'</p>'}
-          }catch{}
+        if(line.startsWith('data: ')&&line.slice(6).trim()!=='[DONE]'){
+          try{const d=JSON.parse(line.slice(6));if(d.text)botText+=d.text;if(d.error)botText+=d.error}catch{}
         }
       }
+      botDiv.innerHTML=`<div class="msg-bubble">${renderMd(botText)}<button class="msg-copy" onclick="copyMsg(${messages.length})">Copy</button></div>`;
+      scrollDown();
     }
-    history.push({role:'assistant',content:fullText});
-    saveChat();
-  }catch(e){
-    hideTyping();
-    addMsg('bot','<p>⚠️ Connection error. Please try again.</p>');
-  }
-  streaming=false;sendBtn.disabled=false;input.focus();
+  }catch(e){botText=botText||'Connection error. Please try again.'}
+
+  messages.push({role:'assistant',content:botText});
+  saveHistory();streaming=false;
+  document.getElementById('send-btn').disabled=false;
+  renderAll();
 }
 
-input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,120)+'px'});
+function scrollDown(){const w=document.getElementById('chat-wrap');w.scrollTop=w.scrollHeight}
+
+function copyMsg(i){
+  const t=messages[i]?.content||'';
+  navigator.clipboard.writeText(t).then(()=>{
+    const btns=document.querySelectorAll('.msg-copy');
+    btns.forEach(b=>{if(b.closest('.msg')===document.querySelectorAll('.msg')[i]){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500)}});
+  });
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function renderMd(s){
+  if(!s)return'';
+  s=esc(s);
+  // Citations like [Source: xxx] or [Document: xxx]
+  s=s.replace(/\[(Source|Document|File|Ref)[:\s]+([^\]]+)\]/gi,'<span class="citation">$1: $2</span>');
+  // Headers
+  s=s.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  s=s.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  s=s.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  // Bold/italic
+  s=s.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  // Code blocks
+  s=s.replace(/```[\w]*\n([\s\S]*?)```/g,'<pre><code>$1</code></pre>');
+  s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+  // Tables
+  s=s.replace(/^(\|.+\|)\n\|[\s\-:|]+\|\n((?:\|.+\|\n?)*)/gm,(m,hdr,rows)=>{
+    const ths=hdr.split('|').filter(c=>c.trim()).map(c=>`<th>${c.trim()}</th>`).join('');
+    const trs=rows.trim().split('\n').map(r=>{
+      const tds=r.split('|').filter(c=>c.trim()).map(c=>`<td>${c.trim()}</td>`).join('');
+      return`<tr>${tds}</tr>`;
+    }).join('');
+    return`<table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+  });
+  // Blockquotes
+  s=s.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+  // Lists
+  s=s.replace(/^[\-\*] (.+)$/gm,'<li>$1</li>');
+  s=s.replace(/^(\d+)\. (.+)$/gm,'<li>$2</li>');
+  s=s.replace(/((?:<li>.+<\/li>\n?)+)/g,'<ul>$1</ul>');
+  // Line breaks to paragraphs
+  s=s.replace(/\n\n+/g,'</p><p>');
+  s=s.replace(/\n/g,'<br>');
+  s='<p>'+s+'</p>';
+  s=s.replace(/<p><\/p>/g,'');
+  return s;
+}
+
+// Auto-resize textarea
+document.getElementById('input').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'});
 </script>
 </body>
 </html>
